@@ -1,10 +1,15 @@
 # ESP32-C6 Playground
 
-A `no_std` Embassy firmware starter for the Adafruit ESP32-C6 Feather. The firmware
-cycles the onboard RGB NeoPixel through the rainbow using the RMT peripheral. It
-enables the NeoPixel's shared power pin (GPIO20) and drives its data pin (GPIO9).
-GPIO9 is also shared with the boot button, so the button is unavailable as an input
-while the NeoPixel is being driven.
+A `no_std` Embassy firmware starter for the Adafruit ESP32-C6 Feather. The onboard
+RGB NeoPixel indicates the battery charge level from the MAX17048 fuel gauge:
+red means low, yellow means mid-charge, and green means full. The level is refreshed
+every five seconds. The gauge is read over I²C (SDA GPIO19, SCL GPIO18).
+
+The firmware enables the NeoPixel and STEMMA QT power pin (GPIO20) and drives the
+NeoPixel data pin (GPIO9). GPIO9 is also shared with the boot button, so the button
+is unavailable as an input while the NeoPixel is being driven. The board's separate
+yellow CHG LED indicates active charging; the MAX17048 reports battery level, not
+whether charging is currently active.
 
 ## Requirements
 

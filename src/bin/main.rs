@@ -7,6 +7,7 @@ use esp_backtrace as _;
 use esp_hal::{
     clock::CpuClock,
     gpio::{Level, Output, OutputConfig},
+    i2c::master::{Config as I2cConfig, I2c},
     rmt::Rmt,
     time::Rate,
     timer::timg::TimerGroup,
@@ -25,6 +26,13 @@ async fn main(_spawner: Spawner) -> ! {
     let peripherals = esp_hal::init(config);
 
     let _neopixel_power = Output::new(peripherals.GPIO20, Level::High, OutputConfig::default());
+    let mut i2c = I2c::new(
+        peripherals.I2C0,
+        I2cConfig::default().with_frequency(Rate::from_khz(100)),
+    )
+    .expect("Failed to initialize I2C")
+    .with_sda(peripherals.GPIO19)
+    .with_scl(peripherals.GPIO18);
 
     let rmt = Rmt::new(peripherals.RMT, Rate::from_mhz(80))
         .expect("Failed to initialize the RMT peripheral");
@@ -37,15 +45,17 @@ async fn main(_spawner: Spawner) -> ! {
     esp_rtos::start(timg0.timer0, software_interrupt.software_interrupt0);
 
     loop {
-        for hue in 0..=u8::MAX {
-            let color = hsv2rgb(Hsv {
-                hue,
-                sat: u8::MAX,
-                val: u8::MAX,
-            });
-            led.write(brightness(gamma([color].into_iter()), 32))
-                .expect("Failed to update the NeoPixel");
-            Timer::after(Duration::from_millis(20)).await;
-        }
+        let mut soc_bytes = [0; 2];
+        i2c.write_read(0x36, &[0x04], &mut soc_bytes)
+            .expect("Failed to read battery state of charge from MAX17048");
+        let state_of_charge = (u16::from_be_bytes(soc_bytes) >> 8).min(100) as u8;
+        let color = hsv2rgb(Hsv {
+            hue: (u16::from(state_of_charge) * 85 / 100) as u8,
+            sat: u8::MAX,
+            val: u8::MAX,
+        });
+        led.write(brightness(gamma([color].into_iter()), 32))
+            .expect("Failed to update the NeoPixel");
+        Timer::after(Duration::from_secs(5)).await;
     }
 }
