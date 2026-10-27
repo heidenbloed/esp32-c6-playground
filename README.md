@@ -1,8 +1,10 @@
 # ESP32-C6 Playground
 
-A `no_std` Embassy firmware starter for the Adafruit ESP32-C6 Feather. The initial
-firmware blinks the board's red LED on GPIO15; the NeoPixel and boot button share
-GPIO9 and are left untouched.
+A `no_std` Embassy firmware starter for the Adafruit ESP32-C6 Feather. The firmware
+cycles the onboard RGB NeoPixel through the rainbow using the RMT peripheral. It
+enables the NeoPixel's shared power pin (GPIO20) and drives its data pin (GPIO9).
+GPIO9 is also shared with the boot button, so the button is unavailable as an input
+while the NeoPixel is being driven.
 
 ## Requirements
 
