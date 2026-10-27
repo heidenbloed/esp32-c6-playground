@@ -12,18 +12,34 @@ is unavailable as an input while the NeoPixel is being driven. The board's separ
 yellow CHG LED indicates active charging; the MAX17048 reports battery level, not
 whether charging is currently active.
 
-An SG90 servo signal can be connected to A3 (GPIO5). The firmware sweeps it gently
-from approximately 0° to 90° and back, using 1.0-1.5 ms pulses at 50 Hz. Servo
-endpoints vary by model and may need calibration; stop if it strains or buzzes at an
-endpoint. An SG90 is a position servo, not a continuous-rotation motor. When trying
-it from the LiPo, connect servo power to BAT and ground to GND; at the battery's
-3.0-4.2 V range, operation may be weak or unreliable because SG90 servos are
-typically specified for 4.8-6 V.
+An SG90 servo signal can be connected to A3 (GPIO5). The firmware maps requested
+angles from 0° to 180° to approximately 1.0-2.0 ms pulses at 50 Hz. Servo endpoints
+vary by model and may need calibration; stop if it strains or buzzes at an endpoint.
+An SG90 is a position servo, not a continuous-rotation motor. When trying it from the
+LiPo, connect servo power to BAT and ground to GND; at the battery's 3.0-4.2 V range,
+operation may be weak or unreliable because SG90 servos are typically specified for
+4.8-6 V.
+
+## Wi-Fi servo control
+
+The board joins a 2.4 GHz Wi-Fi network and serves a simple angle slider on port 80.
+Copy `.wifi.env.example` to `.wifi.env` and set your network's SSID and password:
+
+```sh
+cp .wifi.env.example .wifi.env
+```
+
+`.wifi.env` is git-ignored; credentials are embedded in the firmware at build time.
+After boot, read the assigned address from the serial output and open
+`http://<board-ip>/` on a device on the same local network. The unauthenticated page
+allows any device on that network to set the servo angle from 0° to 180°. Do not
+forward port 80 from the internet; use this only on a trusted LAN.
 
 ## Requirements
 
-- Rust stable with the `riscv32imac-unknown-none-elf` target (the repository's
-  `rust-toolchain.toml` installs/selects both automatically through rustup)
+- Rust stable with the `riscv32imac-unknown-none-elf` target and `rust-analyzer`
+  component (the repository's `rust-toolchain.toml` installs/selects them through
+  rustup)
 - [`espflash`](https://github.com/esp-rs/espflash) to flash and monitor the board
 
 Install `espflash` with:

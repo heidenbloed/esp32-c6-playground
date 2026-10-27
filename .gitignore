@@ -1,4 +1,5 @@
 /target/
+/.wifi.env
 **/*.rs.bk
 *.pdb
 .DS_Store

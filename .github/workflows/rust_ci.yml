@@ -15,6 +15,9 @@ jobs:
   checks:
     name: Format, lint, and build
     runs-on: ubuntu-latest
+    env:
+      WIFI_SSID: ci-network
+      WIFI_PASSWORD: ci-network-password
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
